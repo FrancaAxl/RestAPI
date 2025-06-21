@@ -1,36 +1,25 @@
-package com.example
-
-import com.example.plugins.*
+import com.example.plugins.DatabaseFactory
+import com.example.repositories.UsuarioRepository
+import com.example.routes.userRoutes
+import com.example.services.UsuarioService
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
+import io.ktor.server.routing.routing
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
-        .start(wait = true)
+    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
 }
 
 fun Application.module() {
-    install(ContentNegotiation) {
-        json(Json {
-            prettyPrint = true
-            isLenient = true
-            ignoreUnknownKeys = true
-        })
+    // Configuración de la base de datos
+    DatabaseFactory.init()
+
+    // Inicialización de servicios
+    val usuarioService = UsuarioService(UsuarioRepository())
+
+    // Configuración de rutas
+    routing {
+        userRoutes(usuarioService)
     }
-
-    // Configura la base de datos
-    DatabaseFactory.init(
-        DatabaseConfig(
-            url = "jdbc:mysql://localhost:3306/InventarioTextiles",
-            user = "root",
-            password = "1234"
-        )
-    )
-
-    // Configura las rutas
-    configureRouting()
 }
