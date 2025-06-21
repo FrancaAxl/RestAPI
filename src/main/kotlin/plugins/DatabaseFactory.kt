@@ -40,20 +40,20 @@ object DatabaseFactory {
         dataSource = HikariDataSource(hikariConfig)
         Database.connect(dataSource!!)
 
+        // Crear tablas si no existen
         transaction {
             if (config.showSql) {
-                addLogger(StdOutSqlLogger) // Muestra SQL en consola
+                addLogger(StdOutSqlLogger)
             }
 
-            // Crear tablas si no existen
             SchemaUtils.createMissingTablesAndColumns(
                 Cargos,
                 Usuarios,
-                //Almacenes,
+                Almacenes,
                 Prendas,
-                //PackingLists,
-                //DetallePackingLists,
-               // DetalleInventarioAlmacenes
+                PackingLists,
+                DetallePackingLists,
+                DetalleInventarioAlmacenes
             )
         }
     }
