@@ -1,63 +1,50 @@
 package com.example.services
 
 import com.example.models.Usuario
-import com.example.models.UsuarioDTO
 import com.example.repositories.UsuarioRepository
 import java.util.*
 
-class UsuarioService(private val usuarioRepository: UsuarioRepository) {
-    fun crearUsuario(usuarioDTO: UsuarioDTO): Usuario {
+class UsuarioService(private val repository: UsuarioRepository) {
+    fun createUsuario(nombre: String, user: String, password: String, cargo: UUID): Usuario {
         val usuario = Usuario(
             uuid = UUID.randomUUID(),
-            nombre = usuarioDTO.nombre,
-            user = usuarioDTO.user,
-            password = usuarioDTO.password ?: throw IllegalArgumentException("Password es requerido"),
-            cargo = UUID.fromString(usuarioDTO.cargo),
+            nombre = nombre,
+            user = user,
+            password = password,
+            cargo = cargo,
             eliminado = false,
             fechaModificacion = System.currentTimeMillis(),
             isSync = false
         )
-
-        usuarioRepository.crearUsuario(usuario)
+        repository.create(usuario)
         return usuario
     }
 
-    fun obtenerUsuario(uuid: UUID): Usuario? {
-        return usuarioRepository.obtenerPorId(uuid)
+    fun getUsuario(uuid: UUID): Usuario? {
+        return repository.getById(uuid)
     }
 
-    fun actualizarUsuario(uuid: UUID, usuarioDTO: UsuarioDTO): Usuario? {
-        val usuarioExistente = usuarioRepository.obtenerPorId(uuid) ?: return null
-
-        val usuarioActualizado = usuarioExistente.copy(
-            nombre = usuarioDTO.nombre,
-            user = usuarioDTO.user,
-            cargo = UUID.fromString(usuarioDTO.cargo),
-            fechaModificacion = System.currentTimeMillis(),
-            isSync = false
+    fun updateUsuario(uuid: UUID, nombre: String, user: String, cargo: UUID): Usuario? {
+        val usuario = repository.getById(uuid) ?: return null
+        val updatedUsuario = usuario.copy(
+            nombre = nombre,
+            user = user,
+            cargo = cargo,
+            fechaModificacion = System.currentTimeMillis()
         )
-
-        return if (usuarioRepository.actualizarUsuario(usuarioActualizado)) {
-            usuarioActualizado
-        } else {
-            null
-        }
+        return if (repository.update(updatedUsuario)) updatedUsuario else null
     }
 
-    fun eliminarUsuario(uuid: UUID): Boolean {
-        return usuarioRepository.eliminarUsuario(uuid)
+    fun deleteUsuario(uuid: UUID): Boolean {
+        return repository.delete(uuid)
     }
 
-    fun listarUsuarios(): List<Usuario> {
-        return usuarioRepository.listarUsuarios()
+    fun listUsuarios(): List<Usuario> {
+        return repository.getAll()
     }
 
-    fun autenticarUsuario(username: String, password: String): Usuario? {
-        val usuario = usuarioRepository.obtenerPorUsername(username)
-        return if (usuario != null && usuario.password == password) {
-            usuario
-        } else {
-            null
-        }
+    fun authenticate(username: String, password: String): Usuario? {
+        val usuario = repository.getByUsername(username)
+        return if (usuario != null && usuario.password == password) usuario else null
     }
 }

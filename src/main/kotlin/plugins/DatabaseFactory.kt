@@ -1,5 +1,6 @@
 package com.example.plugins
 
+import com.example.models.*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
@@ -28,6 +29,8 @@ object DatabaseFactory {
             maximumPoolSize = config.poolSize
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+
+            // Optimizaciones para MySQL
             addDataSourceProperty("cachePrepStmts", "true")
             addDataSourceProperty("prepStmtCacheSize", "250")
             addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
@@ -39,11 +42,19 @@ object DatabaseFactory {
 
         transaction {
             if (config.showSql) {
-                addLogger(StdOutSqlLogger)
+                addLogger(StdOutSqlLogger) // Muestra SQL en consola
             }
 
-            // Aquí debes incluir tus tablas reales
-            // SchemaUtils.createMissingTablesAndColumns(Tabla1, Tabla2, ...)
+            // Crear tablas si no existen
+            SchemaUtils.createMissingTablesAndColumns(
+                Cargos,
+                Usuarios,
+                //Almacenes,
+                Prendas,
+                //PackingLists,
+                //DetallePackingLists,
+               // DetalleInventarioAlmacenes
+            )
         }
     }
 

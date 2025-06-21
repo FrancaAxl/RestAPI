@@ -1,25 +1,28 @@
+package com.example
+
+import com.example.plugins.DatabaseConfig
 import com.example.plugins.DatabaseFactory
-import com.example.repositories.UsuarioRepository
-import com.example.routes.userRoutes
-import com.example.services.UsuarioService
+import com.example.plugins.configureRouting
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.routing.routing
 
 fun main() {
-    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module).start(wait = true)
 }
 
 fun Application.module() {
     // Configuración de la base de datos
-    DatabaseFactory.init()
+    DatabaseFactory.init(
+        DatabaseConfig(
+            url = "jdbc:mysql://localhost:3306/InventarioTextiles",
+            user = "root",
+            password = "1234",
+            poolSize = 10,
+            showSql = true // Solo en desarrollo
+        )
+    )
 
-    // Inicialización de servicios
-    val usuarioService = UsuarioService(UsuarioRepository())
-
-    // Configuración de rutas
-    routing {
-        userRoutes(usuarioService)
-    }
+    // Configurar rutas
+    configureRouting()
 }
